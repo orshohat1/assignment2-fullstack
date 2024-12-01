@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import Post from "../models/Post";
+import User from "../models/User"; // Import User model to validate author
 
 class PostController {
 
@@ -12,10 +13,18 @@ class PostController {
             return;
         }
 
-        const { title, content, author } = req.body;
+        const { title, content } = req.body;
+        const { authorId } = req.query; // Get authorId from query
+
+        // Validate if the author exists in the database
+        const user = await User.findById(authorId);
+        if (!user) {
+            res.status(400).json({ error: "Invalid author ID" });
+            return;
+        }
 
         try {
-            const post = new Post({ title, content, author });
+            const post = new Post({ title, content, author: authorId });
             await post.save();
             res.status(201).json(post);
         } catch (err) {
@@ -29,7 +38,7 @@ class PostController {
 
         try {
             const filter = sender ? { author: sender } : {};
-            const posts = await Post.find(filter);
+            const posts = await Post.find(filter).populate("author", "firstName lastName email");
 
             if (sender && posts.length === 0) {
                 res.status(404).json({ message: `No posts found for user ID: ${sender}` });
@@ -47,7 +56,7 @@ class PostController {
         const { id } = req.params;
 
         try {
-            const post = await Post.findById(id);
+            const post = await Post.findById(id).populate("author", "firstName lastName email");
             if (!post) {
                 res.status(404).json({ error: "Post not found" });
                 return;
@@ -59,6 +68,7 @@ class PostController {
     }
 
     // Update post
+    // Update post
     static async updatePost(req: Request, res: Response): Promise<void> {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -67,14 +77,25 @@ class PostController {
         }
 
         const { id } = req.params;
-        const { title, content, author } = req.body;
+        const { title, content } = req.body;
+        const { authorId } = req.query; // Get authorId from query
+
+        // Validate if the author exists in the database
+        if (authorId) {
+            const user = await User.findById(authorId);
+            if (!user) {
+                res.status(400).json({ error: "Invalid author ID" });
+                return;
+            }
+        }
 
         try {
             const post = await Post.findByIdAndUpdate(
                 id,
-                { title, content, author },
+                { title, content, author: authorId },
                 { new: true, runValidators: true }
-            );
+            ).populate("author", "firstName lastName email");
+
             if (!post) {
                 res.status(404).json({ error: "Post not found" });
                 return;
@@ -101,7 +122,6 @@ class PostController {
             return res.status(500).json({ error: "Server error" });
         }
     }
-
 }
 
 export default PostController;
