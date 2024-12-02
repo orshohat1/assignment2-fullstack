@@ -4,32 +4,33 @@ import jwt from "jsonwebtoken";
 import User from "../models/User"; // Import the User model
 import { validationResult } from "express-validator";
 
-const SECRET = "your_jwt_secret"; // Store in an environment variable for security
+const SECRET = "test";
 
 class UserController {
 
   // Sign up
-  static async signUp(req: Request, res: Response): Promise<Response> {
+  static async signUp(req: Request, res: Response): Promise<void> {
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()) {
-      return res.status(400).json({ errors: validationErrors.array() });
+      res.status(400).json({ errors: validationErrors.array() });
+      return;
     }
 
     const { firstName, lastName, email, userName, password } = req.body;
 
-    // Check if the email or username already exists
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
-      return res.status(400).json({ error: "Email is already in use" });
+      res.status(400).json({ error: "Email is already in use" });
+      return;
     }
 
     const existingUserName = await User.findOne({ userName });
     if (existingUserName) {
-      return res.status(400).json({ error: "Username is already in use" });
+      res.status(400).json({ error: "Username is already in use" });
+      return;
     }
 
     try {
-      // Hash password before saving user
       const hashedPassword = bcrypt.hashSync(password, 5);
 
       const newUser = new User({
@@ -40,52 +41,52 @@ class UserController {
         password: hashedPassword,
       });
 
-      // Save user to DB
       await newUser.save();
 
-      // Generate JWT token
       const accessToken = jwt.sign(
         { userId: newUser.id || "user" }, // Assuming a default role
         SECRET
       );
 
-      // Send response with user data and access token
-      return res.status(201).json({
+      res.status(201).json({
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         email: newUser.email,
         userName: newUser.userName,
         accessToken,
       });
+
     } catch (err) {
-      return res.status(500).json({ error: "Server error" });
+      res.status(500).json({ error: "Server error" });
     }
   }
 
   // Login
-  static async login(req: Request, res: Response): Promise<Response> {
+  static async login(req: Request, res: Response): Promise<void> {
     const { email, password } = req.body;
 
     try {
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(404).json({ success: false, message: "User not found" });
+        res.status(404).json({ success: false, message: "User not found" });
+        return;
       }
 
       // Compare password
       const isPasswordValid = bcrypt.compareSync(password, user.password);
       if (!isPasswordValid) {
-        return res.status(401).json({ success: false, message: "Invalid password/email!" });
+        res.status(401).json({ success: false, message: "Invalid password/email!" });
+        return;
       }
 
       // Generate JWT token
       const accessToken = jwt.sign(
-        { userId: user.id || "user" }, // Assuming a default role
+        { userId: user.id || "user" },
         SECRET
       );
 
       // Send response with user data and access token
-      return res.status(200).json({
+      res.status(200).json({
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
@@ -93,23 +94,25 @@ class UserController {
         accessToken,
       });
     } catch (err) {
-      return res.status(500).json({ error: "Server error" });
+      res.status(500).json({ error: "Server error" });
     }
   }
 
+
   // Logout
-  static async logout(req: Request, res: Response): Promise<Response> {
+  static async logout(req: Request, res: Response): Promise<void> {
     try {
       const token = req.header("Authorization")?.replace("Bearer ", "");
       if (!token) {
-        return res.status(400).json({ error: "Token is required for logout" });
+        res.status(403).json({ error: "Token is required for logout" });
+        return;
       }
-
-      return res.status(200).json({ message: "Logout successful" });
+      res.status(200).json({ message: "Logout successful" });
     } catch (err) {
-      return res.status(500).json({ error: "Server error" });
+      res.status(500).json({ error: "Server error" });
     }
   }
+
 }
 
 export default UserController;

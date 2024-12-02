@@ -116,21 +116,23 @@ class PostController {
     }
 
     // Delete post
-    static async deletePost(req: Request, res: Response): Promise<Response> {
+    static async deletePost(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
 
         try {
             const post = await Post.findByIdAndDelete(id);
 
             if (!post) {
-                return res.status(404).json({ error: "Post not found" });
+                res.status(404).json({ error: "Post not found" });
+                return;
             }
 
-            return res.status(200).json({ message: "Post deleted successfully" });
+            res.status(200).json({ message: "Post deleted successfully" });
         } catch (err) {
-            return res.status(500).json({ error: "Server error" });
+            res.status(500).json({ error: "Server error" });
         }
     }
+
 }
 
 export default PostController;

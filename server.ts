@@ -12,6 +12,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/posts', PostRouter);
 app.use('/users', UserRouter);
 
+export default app;
+
 startServer();
 
 async function startServer() {

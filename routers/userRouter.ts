@@ -1,6 +1,6 @@
 import express from "express";
 import { check } from "express-validator";
-import UserController from "../controllers/userController";
+import UserController from "../controllers/UserController";
 import verifyToken from "../middleware/verifyToken";
 
 const router = express.Router();
