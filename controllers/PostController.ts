@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
+import mongoose from "mongoose";
 import Post from "../models/Post";
-import User from "../models/User"; // Import User model to validate author
+import User from "../models/User";
 
 class PostController {
 
@@ -14,16 +15,23 @@ class PostController {
         }
 
         const { title, content } = req.body;
-        const { authorId } = req.query; // Get authorId from query
+        const { authorId } = req.query;
 
-        // Validate if the author exists in the database
-        const user = await User.findById(authorId);
-        if (!user) {
-            res.status(400).json({ error: "Invalid author ID" });
+        // Validate the format of authorId
+        if (!authorId || !mongoose.isValidObjectId(authorId)) {
+            res.status(400).json({ error: "Invalid author ID format" });
             return;
         }
 
         try {
+            // Check if the author exists in the database
+            const user = await User.findById(authorId);
+            if (!user) {
+                res.status(400).json({ error: "Author not found" });
+                return;
+            }
+
+            // Create and save the post
             const post = new Post({ title, content, author: authorId });
             await post.save();
             res.status(201).json(post);
@@ -31,6 +39,7 @@ class PostController {
             res.status(500).json({ error: "Server error" });
         }
     }
+
 
     // Get posts (all or by sender)
     static async getPosts(req: Request, res: Response): Promise<void> {

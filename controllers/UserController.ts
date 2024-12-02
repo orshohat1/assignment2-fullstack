@@ -7,8 +7,8 @@ import { validationResult } from "express-validator";
 const SECRET = "your_jwt_secret"; // Store in an environment variable for security
 
 class UserController {
-  
-    // Sign up
+
+  // Sign up
   static async signUp(req: Request, res: Response): Promise<Response> {
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()) {
@@ -31,7 +31,7 @@ class UserController {
     try {
       // Hash password before saving user
       const hashedPassword = bcrypt.hashSync(password, 5);
-      
+
       const newUser = new User({
         firstName,
         lastName,
@@ -45,7 +45,7 @@ class UserController {
 
       // Generate JWT token
       const accessToken = jwt.sign(
-        { userId: newUser.id|| "user" }, // Assuming a default role
+        { userId: newUser.id || "user" }, // Assuming a default role
         SECRET
       );
 
@@ -75,12 +75,12 @@ class UserController {
       // Compare password
       const isPasswordValid = bcrypt.compareSync(password, user.password);
       if (!isPasswordValid) {
-        return res.status(401).json({ success: false, message: "Invalid password!" });
+        return res.status(401).json({ success: false, message: "Invalid password/email!" });
       }
 
       // Generate JWT token
       const accessToken = jwt.sign(
-        { userId: user.id|| "user" }, // Assuming a default role
+        { userId: user.id || "user" }, // Assuming a default role
         SECRET
       );
 
@@ -92,6 +92,20 @@ class UserController {
         userName: user.userName,
         accessToken,
       });
+    } catch (err) {
+      return res.status(500).json({ error: "Server error" });
+    }
+  }
+
+  // Logout
+  static async logout(req: Request, res: Response): Promise<Response> {
+    try {
+      const token = req.header("Authorization")?.replace("Bearer ", "");
+      if (!token) {
+        return res.status(400).json({ error: "Token is required for logout" });
+      }
+
+      return res.status(200).json({ message: "Logout successful" });
     } catch (err) {
       return res.status(500).json({ error: "Server error" });
     }

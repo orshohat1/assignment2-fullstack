@@ -1,11 +1,16 @@
 import express from 'express';
 import { connectDb } from './mongodb';
-const PORT = 4000;
+import PostRouter from './routers/postRouter'; 
+import UserRouter from './routers/userRouter';
+
+const PORT = 3000;
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 
+app.use('/posts', PostRouter);
+app.use('/users', UserRouter);
 
 startServer();
 

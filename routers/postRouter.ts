@@ -12,7 +12,6 @@ router.post(
   [
     check("title").notEmpty().isString().withMessage("Title must be a non-empty string."),
     check("content").notEmpty().isString().withMessage("Content must be a non-empty string."),
-    check("author").notEmpty().isString().withMessage("Author must be a non-empty string."),
   ],
   PostController.addPost
 );
@@ -30,12 +29,11 @@ router.put(
   [
     check("title").optional().notEmpty().isString().withMessage("Title must be a string."),
     check("content").optional().notEmpty().isString().withMessage("Content must be a string."),
-    check("author").optional().notEmpty().isString().withMessage("Author must be a string."),
   ],
   PostController.updatePost
 );
 
-// DELETE: Delete a post by ID
+// Delete a post by ID
 router.delete("/:id", verifyToken, PostController.deletePost);
 
 export default router;
