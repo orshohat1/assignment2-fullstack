@@ -1,6 +1,6 @@
 import express from 'express';
 import { connectDb } from './mongodb';
-import PostRouter from './routers/postRouter'; 
+import PostRouter from './routers/postRouter';
 import UserRouter from './routers/userRouter';
 
 const PORT = 3000;
@@ -14,9 +14,13 @@ app.use('/users', UserRouter);
 
 export default app;
 
-startServer();
-
-async function startServer() {
+export async function startServer(port = PORT) {
     await connectDb();
-    app.listen(PORT, () => console.log(`Server is up at ${PORT}`));
+    return app.listen(port, () => console.log(`Server is up at ${port}`));
+}
+
+if (require.main === module) {
+    (async () => {
+        await startServer(PORT);
+    })();
 }

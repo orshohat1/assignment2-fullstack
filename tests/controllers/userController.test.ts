@@ -14,19 +14,16 @@ describe('UserController', () => {
     lastName: 'Doe',
     email: 'testuser@example.com',
     userName: 'testuser',
-    password: bcrypt.hashSync('password123', 5),  // Pre-hashed password for test
+    password: bcrypt.hashSync('password123', 5), 
   };
 
   beforeAll(() => {
-    // Mock User.findOne method to return null (no existing user)
-    (User.findOne as jest.Mock).mockResolvedValue(null);  // No user exists for signup
-    // Mock User.create method to return the mock user upon successful creation
+    (User.findOne as jest.Mock).mockResolvedValue(null);
     (User.create as jest.Mock).mockResolvedValue({
       ...mockUser,
       save: jest.fn(),
     });
 
-    // Generate an access token for testing
     accessToken = jwt.sign({ userId: mockUser._id }, "test");
   });
 
@@ -42,12 +39,12 @@ describe('UserController', () => {
         password: 'password123',
       });
 
-    expect(response.status).toBe(201); // Check that the response status is 201 Created
+    expect(response.status).toBe(201);
   });
 
   // Test for invalid email during signup (already used email)
   it('should return an error if email is already in use', async () => {
-    (User.findOne as jest.Mock).mockResolvedValueOnce(mockUser); // Mock to simulate existing user with the same email
+    (User.findOne as jest.Mock).mockResolvedValueOnce(mockUser);
     const response = await request(app)
       .post('/users/signup')
       .send({
@@ -63,7 +60,7 @@ describe('UserController', () => {
 
   // Test for invalid username during signup (already used username)
   it('should return an error if username is already in use', async () => {
-    (User.findOne as jest.Mock).mockResolvedValueOnce(mockUser); // Mock to simulate existing user with the same username
+    (User.findOne as jest.Mock).mockResolvedValueOnce(mockUser); 
     const response = await request(app)
       .post('/users/signup')
       .send({
@@ -79,7 +76,7 @@ describe('UserController', () => {
 
   // Test Login route
   it('should log in an existing user with correct credentials', async () => {
-    (User.findOne as jest.Mock).mockResolvedValue(mockUser); // Mocking user found in DB
+    (User.findOne as jest.Mock).mockResolvedValue(mockUser);
 
     const response = await request(app)
       .post('/users/login')
@@ -88,7 +85,7 @@ describe('UserController', () => {
         password: 'password123',
       });
 
-    expect(response.status).toBe(200); // Should log in successfully
+    expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('accessToken');
     expect(response.body).toHaveProperty('firstName', 'John');
     expect(response.body).toHaveProperty('lastName', 'Doe');
@@ -96,7 +93,7 @@ describe('UserController', () => {
 
   // Test for invalid login credentials (wrong password)
   it('should return an error for invalid login credentials', async () => {
-    (User.findOne as jest.Mock).mockResolvedValue(mockUser); // Mocking user found in DB
+    (User.findOne as jest.Mock).mockResolvedValue(mockUser);
 
     const response = await request(app)
       .post('/users/login')
@@ -105,7 +102,7 @@ describe('UserController', () => {
         password: 'wrongpassword', // Invalid password
       });
 
-    expect(response.status).toBe(401); // Unauthorized
+    expect(response.status).toBe(401); 
     expect(response.body).toHaveProperty('message', 'Invalid password/email!');
   });
 
@@ -113,7 +110,7 @@ describe('UserController', () => {
   it('should log out a user', async () => {
     const response = await request(app)
       .post('/users/logout')
-      .set('Authorization', `Bearer ${accessToken}`); // Send the valid token
+      .set('Authorization', `Bearer ${accessToken}`);
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('message', 'Logout successful');
@@ -122,7 +119,7 @@ describe('UserController', () => {
   // Test for missing token on logout
   it('should return an error when no token is provided for logout', async () => {
     const response = await request(app)
-      .post('/users/logout'); // No token provided
+      .post('/users/logout'); 
 
     expect(response.status).toBe(403);
   });

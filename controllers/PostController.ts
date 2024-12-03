@@ -77,7 +77,6 @@ class PostController {
     }
 
     // Update post
-    // Update post
     static async updatePost(req: Request, res: Response): Promise<void> {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
