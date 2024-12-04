@@ -1,23 +1,23 @@
 {
     "compilerOptions": {
-      "target": "ES6", // Target ES6 for modern JavaScript
-      "module": "commonjs", // Use CommonJS modules for compatibility with Node.js
-      "strict": true, // Enable all strict type checks
-      "esModuleInterop": true, // Fix compatibility issues with CommonJS modules
-      "resolveJsonModule": true, // Allow importing JSON files
-      "outDir": "./dist", // Output directory for compiled files
-      "rootDir": ".", // Set the root directory for TypeScript files
-      "skipLibCheck": true, // Skip type checking of declaration files
-      "types": ["jest", "node"], // Include jest types
+      "target": "ES6", 
+      "module": "commonjs", 
+      "strict": true,
+      "esModuleInterop": true, 
+      "resolveJsonModule": true, 
+      "outDir": "./dist", 
+      "rootDir": ".", 
+      "skipLibCheck": true, 
+      "types": ["jest", "node"], 
     },
     "include": [
-      "**/*.ts", // Include all .ts files
-      "tests/**/*.ts" // Include tests
+      "**/*.ts", 
+      "tests/**/*.ts" 
     ],
     "exclude": [
-      "node_modules", // Exclude node_modules
-      "dist", // Exclude dist directory
-      "**/*.test.ts" // Don't exclude test files
+      "node_modules", 
+      "dist", 
+      "**/*.test.ts" 
     ]
   }
   
