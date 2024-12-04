@@ -6,6 +6,7 @@ const config: Config.InitialOptions = {
   },
   testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+  roots: ["<rootDir>"]
 };
 
 export default config;
