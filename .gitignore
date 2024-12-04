@@ -1,0 +1,6 @@
+*.tgz
+*.lock
+.DS_Store
+.idea/
+.vscode/
+node_modules
