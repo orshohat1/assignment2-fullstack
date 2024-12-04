@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import User from "../models/User"; // Import the User model
+import User from "../models/User";
 import { validationResult } from "express-validator";
 
 const SECRET = "test";
@@ -44,7 +44,7 @@ class UserController {
       await newUser.save();
 
       const accessToken = jwt.sign(
-        { userId: newUser.id || "user" }, // Assuming a default role
+        { userId: newUser.id || "user" },
         SECRET
       );
 
@@ -72,20 +72,17 @@ class UserController {
         return;
       }
 
-      // Compare password
       const isPasswordValid = bcrypt.compareSync(password, user.password);
       if (!isPasswordValid) {
         res.status(401).json({ success: false, message: "Invalid password/email!" });
         return;
       }
 
-      // Generate JWT token
       const accessToken = jwt.sign(
         { userId: user.id || "user" },
         SECRET
       );
 
-      // Send response with user data and access token
       res.status(200).json({
         firstName: user.firstName,
         lastName: user.lastName,

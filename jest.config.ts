@@ -2,10 +2,10 @@ import type { Config } from '@jest/types';
 
 const config: Config.InitialOptions = {
   transform: {
-    '^.+\\.tsx?$': 'ts-jest', // Use ts-jest for TypeScript files
+    '^.+\\.tsx?$': 'ts-jest',
   },
-  testEnvironment: 'node', // Use Node.js environment for testing
-  moduleFileExtensions: ['ts', 'js', 'json', 'node'], // Add support for TypeScript files
+  testEnvironment: 'node',
+  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
 };
 
 export default config;
