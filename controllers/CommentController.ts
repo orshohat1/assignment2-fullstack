@@ -1,5 +1,6 @@
 import Comment from "../models/Comment";
 import mongoose from "mongoose";
+import { isValidObjectId } from "mongoose";
 import { Request, Response } from "express";
 import Post from "../models/Post";
 import User from "../models/User";
@@ -8,9 +9,12 @@ class CommentController {
     static async createComment(req: Request, res: Response): Promise<void> {
         const { postId } = req.params;
         const { author, content } = req.body;
+
         if (!content || content.trim() === '') {
             res.status(400).send("comment is empty");
+            return;
         }
+
         try {
             const comment = new Comment({ author, content, postId });
             await comment.save();
@@ -26,6 +30,12 @@ class CommentController {
 
     static async getCommentById(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
+
+        if (!isValidObjectId(id)) {
+            res.status(400).send("Invalid Comment ID");
+            return;
+        }
+
         try {
             const comment = await Comment.findById(id);
             res.status(200).send({ comment });
@@ -41,8 +51,14 @@ class CommentController {
     static async getAllPostComments(req: Request, res: Response): Promise<void> {
         const { postId } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(postId)) {
-            res.status(400).json({ error: "Invalid Post ID" });
+        // if (!mongoose.Types.ObjectId.isValid(postId)) {
+        //     res.status(400).json({ error: "Invalid Post ID" });
+
+        // }
+
+        if (!isValidObjectId(postId)) {
+            res.status(400).json({error: "Invalid Post ID"});
+            return;
         }
 
         try {
@@ -61,8 +77,15 @@ class CommentController {
     static async editComment(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
         const { content } = req.body;
+
+        if (!isValidObjectId(id)) {
+            res.status(404).json({ error: "Invalid Comment ID" });
+            return;
+        }
+
         if (!content || content.trim() === '') {
             res.status(400).send("comment is empty");
+            return;
         }
         const comment = await Comment.findById(id);
         if (!comment) {
@@ -85,6 +108,12 @@ class CommentController {
     static async deleteComment(req: Request, res: Response): Promise<void> {
         console.log(req.body);
         const { id } = req.params;
+
+        if (!isValidObjectId(id)) {
+            res.status(404).json({ error: "Invalid Comment ID" });
+            return;
+        }
+
         try {
             const comment = await Comment.findByIdAndDelete(id);
             res.status(200).send({ message: "comment deleted successfully", comment });

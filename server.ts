@@ -2,15 +2,17 @@ import express from 'express';
 import { connectDb } from './mongodb';
 import PostRouter from './routers/postRouter';
 import UserRouter from './routers/userRouter';
+import CommentRouter from './routers/commentRouter'
 
 const PORT = 3000;
 
-const app = express();
+const app: any = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/posts', PostRouter);
 app.use('/users', UserRouter);
+app.use('/comments', CommentRouter);
 
 export default app;
 

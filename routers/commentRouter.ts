@@ -1,7 +1,8 @@
 import express from "express";
-const router = express.Router();
+import { check } from "express-validator";
 import CommentController from "../controllers/CommentController";
 import verifyToken from "../middleware/verifyToken";
+const router = express.Router();
 
 router.get("/postComments/:postId", CommentController.getAllPostComments);
 
@@ -13,4 +14,4 @@ router.put("/:id", CommentController.editComment);
 
 router.delete("/:id", CommentController.deleteComment);
 
-module.exports = router;
+export default router;
