@@ -51,13 +51,8 @@ class CommentController {
     static async getAllPostComments(req: Request, res: Response): Promise<void> {
         const { postId } = req.params;
 
-        // if (!mongoose.Types.ObjectId.isValid(postId)) {
-        //     res.status(400).json({ error: "Invalid Post ID" });
-
-        // }
-
         if (!isValidObjectId(postId)) {
-            res.status(400).json({error: "Invalid Post ID"});
+            res.status(400).json({ error: "Invalid Post ID" });
             return;
         }
 

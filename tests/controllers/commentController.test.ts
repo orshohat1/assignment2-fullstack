@@ -6,12 +6,13 @@ import Post from "../../models/Post";
 import User from "../../models/User";
 import { connectDb } from "../../mongodb";
 
-// Mock data
+jest.mock("../../middleware/verifyToken", () => jest.fn((req, res, next) => next()));
+
 const mockPostId = new mongoose.Types.ObjectId();
 const mockAuthorId = new mongoose.Types.ObjectId();
 const mockCommentId = new mongoose.Types.ObjectId();
 
-// Set up the database connection before tests
+// database connection and creations
 beforeAll(async () => {
     await connectDb();
 
@@ -19,7 +20,7 @@ beforeAll(async () => {
     await Post.create({ _id: mockPostId, title: "Test Post", content: "Post Content", author: mockAuthorId });
 });
 
-// Clean up after tests
+// cleanup
 afterAll(async () => {
     await Comment.deleteMany({});
     await Post.deleteMany({});
