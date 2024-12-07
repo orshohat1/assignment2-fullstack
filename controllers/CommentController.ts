@@ -2,8 +2,6 @@ import Comment from "../models/Comment";
 import mongoose from "mongoose";
 import { isValidObjectId } from "mongoose";
 import { Request, Response } from "express";
-import Post from "../models/Post";
-import User from "../models/User";
 
 class CommentController {
     static async createComment(req: Request, res: Response): Promise<void> {
