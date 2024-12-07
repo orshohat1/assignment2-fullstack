@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../../server"; 
+import app from "../../server";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../../models/User";
@@ -9,12 +9,12 @@ jest.mock("../../models/User");
 describe('UserController', () => {
   let accessToken: string;
   const mockUser = {
-    _id: '12345',
+    _id: '67530ccde226e97f7d2dc3a5',
     firstName: 'John',
     lastName: 'Doe',
     email: 'testuser@example.com',
     userName: 'testuser',
-    password: bcrypt.hashSync('password123', 5), 
+    password: bcrypt.hashSync('password123', 5),
   };
 
   beforeAll(() => {
@@ -60,7 +60,7 @@ describe('UserController', () => {
 
   // Test for invalid username during signup (already used username)
   it('should return an error if username is already in use', async () => {
-    (User.findOne as jest.Mock).mockResolvedValueOnce(mockUser); 
+    (User.findOne as jest.Mock).mockResolvedValueOnce(mockUser);
     const response = await request(app)
       .post('/users/signup')
       .send({
@@ -72,6 +72,64 @@ describe('UserController', () => {
       });
 
     expect(response.status).toBe(400);
+  });
+
+  it("should update a user by ID", async () => {
+    const updatedUser = { ...mockUser, firstName: "updated newfirstname" };
+
+    (User.findByIdAndUpdate as jest.Mock).mockResolvedValueOnce(updatedUser);
+
+    const response = await request(app)
+      .put(`/users/${mockUser._id}`)
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({ firstName: "updated newfirstname" });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("message", "User updated successfully");
+    expect(response.body.user).toHaveProperty("firstName", "updated newfirstname");
+  });
+
+  it("should get a user by ID", async () => {
+    (User.findById as jest.Mock).mockResolvedValue(mockUser);
+
+    const response = await request(app).get(`/users/${mockUser._id}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("message", "User found!");
+    expect(response.body.user).toHaveProperty("firstName", mockUser.firstName);
+    expect(response.body.user).toHaveProperty("lastName", mockUser.lastName);
+    expect(response.body.user).toHaveProperty("email", mockUser.email);
+    expect(response.body.user).toHaveProperty("userName", mockUser.userName);
+  });
+
+  it("should return an error if user is not found", async () => {
+    (User.findById as jest.Mock).mockResolvedValue(null);
+
+    const response = await request(app).get(`/users/${mockUser._id}`);
+
+    expect(response.status).toBe(404);
+    expect(response.body).toHaveProperty("error", "User not found");
+  });
+
+  it("should delete a user by ID", async () => {
+    (User.findByIdAndDelete as jest.Mock).mockResolvedValue(mockUser);
+
+    const response = await request(app).delete(`/users/${mockUser._id}`).set("Authorization", `Bearer ${accessToken}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("message", "User deleted!");
+    expect(response.body.user).toHaveProperty("_id", mockUser._id);
+    expect(response.body.user).toHaveProperty("firstName", mockUser.firstName);
+    expect(response.body.user).toHaveProperty("lastName", mockUser.lastName);
+  });
+
+  it("should return an error if the user is not found", async () => {
+    (User.findByIdAndDelete as jest.Mock).mockResolvedValue(null);
+
+    const response = await request(app).delete(`/users/inValidId`).set("Authorization", `Bearer ${accessToken}`);
+
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("error", "User not found");
   });
 
   // Test Login route
@@ -102,7 +160,7 @@ describe('UserController', () => {
         password: 'wrongpassword', // Invalid password
       });
 
-    expect(response.status).toBe(401); 
+    expect(response.status).toBe(401);
     expect(response.body).toHaveProperty('message', 'Invalid password/email!');
   });
 
@@ -119,7 +177,7 @@ describe('UserController', () => {
   // Test for missing token on logout
   it('should return an error when no token is provided for logout', async () => {
     const response = await request(app)
-      .post('/users/logout'); 
+      .post('/users/logout');
 
     expect(response.status).toBe(403);
   });

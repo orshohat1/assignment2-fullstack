@@ -1,0 +1,549 @@
+openapi: 3.0.0
+info:
+  title: Blog API
+  description: API for managing posts, users, and comments.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:3000
+    description: Local server
+paths:
+  /users/signup:
+    post:
+      summary: Sign up a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                userName:
+                  type: string
+                password:
+                  type: string
+                  format: password
+              required: [firstName, lastName, email, userName, password]
+              example:
+                firstName: "John"
+                lastName: "Doe"
+                email: "johndoe@example.com"
+                userName: "johnD"
+                password: "Aa123456"
+      responses:
+        "201":
+          description: User signed up successfully
+  /users/login:
+    post:
+      summary: Log in a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+              required: [email, password]
+              example:
+                email: "johndoe@example.com"
+                password: "Aa123456"
+      responses:
+        "200":
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              example:
+                token: "jwt-token"
+  /users/logout:
+    post:
+      summary: Log out a user
+      description: Logs out the authenticated user by invalidating their session or token.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User logged out successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "User logged out successfully"
+        "401":
+          description: Unauthorized. The user is not authenticated or token is invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Unauthorized"
+  /users/{id}:
+    get:
+      summary: Get user by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the user to retrieve.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+                  email:
+                    type: string
+                  userName:
+                    type: string
+              example:
+                id: "1"
+                firstName: "John"
+                lastName: "Doe"
+                email: "johndoe@example.com"
+                userName: "johnD"
+    delete:
+      summary: Delete a user by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the user to delete.
+          schema:
+            type: string
+      responses:
+        "204":
+          description: User deleted successfully.
+        "401":
+          description: Unauthorized. The user is not authenticated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Unauthorized"
+        "404":
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "User not found"
+    put:
+      summary: Edit a user by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the user to update.
+          schema:
+            type: string
+      requestBody:
+        description: The user details to update.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                userName:
+                  type: string
+              example:
+                firstName: "John"
+                lastName: "Doe"
+                email: "johndoe@example.com"
+                userName: "john_doe_updated"
+      responses:
+        "200":
+          description: User updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "User updated successfully"
+        "401":
+          description: Unauthorized. The user is not authenticated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Unauthorized"
+        "404":
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "User not found"
+  /posts:
+    get:
+      summary: Get all posts or posts by author
+      parameters:
+        - in: query
+          name: sender
+          required: false
+          schema:
+            type: string
+          description: The author of the posts to filter by (optional)
+      responses:
+        "200":
+          description: List of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    content:
+                      type: string
+                    author:
+                      type: string
+                example:
+                  - id: "1"
+                    title: "First Post"
+                    content: "This is the first post"
+                    author: "user1"
+    post:
+      summary: Add a new post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: authorId
+          required: true
+          schema:
+            type: string
+          description: The ID of the author creating the post
+      requestBody:
+        description: Post object to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+              example:
+                title: "New Post"
+                content: "This is the content of the new post"
+      responses:
+        "201":
+          description: Post created successfully
+
+  /posts/{id}:
+    get:
+      summary: Get a post by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the post
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+                  content:
+                    type: string
+                  author:
+                    type: string
+              example:
+                id: "1"
+                title: "First Post"
+                content: "This is the first post"
+                author: "user1"
+    put:
+      summary: Update a post by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the post to update
+          schema:
+            type: string
+      requestBody:
+        description: Updated post object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+              example:
+                title: "Updated Title"
+                content: "Updated content"
+      responses:
+        "200":
+          description: Post updated successfully
+    delete:
+      summary: Delete a post by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the post to delete
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Post deleted successfully
+  
+  /comments/post/{postId}:
+    post:
+      summary: Create a new comment on a post
+      description: Creates a new comment on the specified post. Requires authentication.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+          description: The ID of the post to add the comment to
+      requestBody:
+        description: The comment data to be created
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: The content of the comment
+                author:
+                  type: string
+                  description: The author ID
+              required:
+                - content
+                - author
+              example:
+                content: "This is a new comment on the post"
+                author: "12345"
+      responses:
+        "201":
+          description: Comment created successfully
+        "401":
+          description: Unauthorized, token is required
+        "400":
+          description: Bad request, invalid data
+
+  /comments/{id}:
+    get:
+      summary: Get a comment by ID
+      description: Retrieves a specific comment by its ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the comment to retrieve
+      responses:
+        "200":
+          description: The comment details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  content:
+                    type: string
+                  author:
+                    type: string
+                example:
+                  id: "1"
+                  content: "This is a comment"
+                  author: "user1"
+        "404":
+          description: Comment not found
+
+    put:
+      summary: Edit a comment
+      description: Updates an existing comment. Requires authentication.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the comment to edit
+      requestBody:
+        description: The updated comment data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: The updated content of the comment
+              required:
+                - content
+              example:
+                content: "This is the updated content of the comment"
+      responses:
+        "200":
+          description: Comment updated successfully
+        "401":
+          description: Unauthorized, token is required
+        "404":
+          description: Comment not found
+        "400":
+          description: Bad request, invalid data
+
+    delete:
+      summary: Delete a comment
+      description: Deletes a comment by its ID. Requires authentication.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the comment to delete
+      responses:
+        "200":
+          description: Comment deleted successfully
+        "401":
+          description: Unauthorized, token is required
+        "404":
+          description: Comment not found
+
+  /comments/postComments/{postId}:
+    get:
+      summary: Get all comments for a specific post
+      description: Retrieves all comments associated with a particular post identified by `postId`.
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+          description: The ID of the post to retrieve comments for
+      responses:
+        "200":
+          description: List of comments for the specified post
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    content:
+                      type: string
+                    author:
+                      type: string
+                example:
+                  - id: "1"
+                    content: "This is the first comment on this post"
+                    author: "user1"
+                  - id: "2"
+                    content: "This is the second comment on this post"
+                    author: "user2"
+        "404":
+          description: Post not found, no comments available for this post
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
