@@ -39,6 +39,10 @@ paths:
       responses:
         "201":
           description: User signed up successfully
+        "400":
+          description: Bad Request
+        "500":
+          description: Server Error
   /users/login:
     post:
       summary: Log in a user
@@ -62,6 +66,12 @@ paths:
       responses:
         "200":
           description: User logged in successfully
+        "401":
+          description: Invalid Credentials
+        "404":
+          description: User not found
+        "500":
+          description: Server Error
           content:
             application/json:
               schema:
@@ -100,6 +110,10 @@ paths:
                     type: string
               example:
                 error: "Unauthorized"
+        "403":
+          description: Token is required for logout
+        "500":
+          description: Server Error
   /users/{id}:
     get:
       summary: Get user by ID
@@ -134,6 +148,12 @@ paths:
                 lastName: "Doe"
                 email: "johndoe@example.com"
                 userName: "johnD"
+        "400":
+          description: Must pass userId
+        "404":
+          description: User not found
+        "500":
+          description: Server Error
     delete:
       summary: Delete a user by ID
       security:
@@ -146,7 +166,7 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        "200":
           description: User deleted successfully.
         "401":
           description: Unauthorized. The user is not authenticated.
@@ -297,8 +317,10 @@ paths:
                 title: "New Post"
                 content: "This is the content of the new post"
       responses:
-        "201":
+        "200":
           description: Post created successfully
+        "500":
+          description: Server Error
 
   /posts/{id}:
     get:
@@ -331,6 +353,8 @@ paths:
                 title: "First Post"
                 content: "This is the first post"
                 author: "user1"
+        "500":
+          description: Server Error
     put:
       summary: Update a post by ID
       security:
@@ -360,6 +384,8 @@ paths:
       responses:
         "200":
           description: Post updated successfully
+        "500":
+          description: Server Error
     delete:
       summary: Delete a post by ID
       security:
@@ -372,8 +398,12 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        "200":
           description: Post deleted successfully
+        "404":
+          description: Post not found
+        "500":
+          description: Server Error
   
   /comments/post/{postId}:
     post:
@@ -411,10 +441,10 @@ paths:
       responses:
         "201":
           description: Comment created successfully
+        "400":
+          description: Bad request
         "401":
           description: Unauthorized, token is required
-        "400":
-          description: Bad request, invalid data
 
   /comments/{id}:
     get:
@@ -445,6 +475,8 @@ paths:
                   id: "1"
                   content: "This is a comment"
                   author: "user1"
+        "400":
+          description: Invalid comment ID
         "404":
           description: Comment not found
 
@@ -478,12 +510,12 @@ paths:
       responses:
         "200":
           description: Comment updated successfully
+        "400":
+          description: Bad request
         "401":
           description: Unauthorized, token is required
         "404":
           description: Comment not found
-        "400":
-          description: Bad request, invalid data
 
     delete:
       summary: Delete a comment
