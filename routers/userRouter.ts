@@ -5,7 +5,7 @@ import verifyToken from "../middleware/verifyToken";
 
 const router = express.Router();
 
-// Register a new user
+// create user (signup)
 router.post(
   "/signup",
   [
@@ -18,7 +18,27 @@ router.post(
   UserController.signUp
 );
 
-// Login
+// update user by id
+router.put(
+  "/:id",
+  verifyToken,
+  UserController.updateUser
+);
+
+// get user by id
+router.get(
+  "/:id",
+  UserController.getUser
+);
+
+// delete user by id
+router.delete(
+  "/:id",
+  verifyToken,
+  UserController.deleteUser
+);
+
+// login
 router.post(
   "/login",
   [
@@ -28,7 +48,7 @@ router.post(
   UserController.login
 );
 
-// Logout
+// logout
 router.post("/logout", verifyToken, UserController.logout);
 
 export default router;
