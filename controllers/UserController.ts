@@ -163,15 +163,32 @@ class UserController {
 
       const accessToken = jwt.sign(
         { userId: user.id || "user" },
-        SECRET
+        SECRET,
+        { expiresIn: "1h" }
       );
+
+      console.log(accessToken)
+
+      const refreshToken = jwt.sign(
+        { userId: user.id || "user" },
+        SECRET,
+        { expiresIn: "7d" }
+      );
+
+      console.log(refreshToken)
+
+      if (refreshToken) {
+        user.refreshTokens?.push(refreshToken)
+      }
+      await user.save(); // save the refresh token in user object
 
       res.status(200).json({
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
         userName: user.userName,
-        accessToken,
+        accessToken: accessToken,
+        refreshToken: refreshToken
       });
     } catch (err) {
       res.status(500).json({ error: "Server error" });
