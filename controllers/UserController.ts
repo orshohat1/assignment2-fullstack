@@ -1,11 +1,15 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import User from "../models/User";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import { isValidObjectId } from "mongoose";
+import User from "../models/User";
 
 const SECRET = "test";
+
+interface TokenPayload extends JwtPayload {
+  userId: string;
+}
 
 class UserController {
 
@@ -167,15 +171,11 @@ class UserController {
         { expiresIn: "1h" }
       );
 
-      console.log(accessToken)
-
       const refreshToken = jwt.sign(
         { userId: user.id || "user" },
         SECRET,
         { expiresIn: "7d" }
       );
-
-      console.log(refreshToken)
 
       if (refreshToken) {
         user.refreshTokens?.push(refreshToken)
@@ -199,9 +199,39 @@ class UserController {
   // logout
   static async logout(req: Request, res: Response): Promise<void> {
     try {
-      const token = req.header("Authorization")?.replace("Bearer ", "");
-      if (!token) {
-        res.status(403).json({ error: "Token is required for logout" });
+      // refresh token
+      const refreshToken = req.body.refreshToken;
+      if (!refreshToken) {
+        res.status(400).json({ message: "Refresh token not found" });
+        return;
+      }
+      const decoded = jwt.verify(refreshToken, SECRET) as TokenPayload;
+      if (!decoded) {
+        res.status(400).json({ error: "Invalid decoded" });
+        return;
+      }
+
+      const user = await User.findOne({ _id: decoded.userId });
+      if (!user) {
+        res.status(400).json({ message: "Invalid refresh token" });
+        return;
+      }
+
+      // If refreshTokens list doesn't include 'refreshToken', we clear the list (maybe a breach)
+      if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
+        user.refreshTokens = [];
+        await user.save();
+        res.status(400).json({ message: "Invalid refresh token" });
+        return;
+      }
+
+      // remove 'refreshToken' from refreshTokens list 
+      user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
+      await user.save();
+
+      const accessToken = req.header("Authorization")?.replace("Bearer ", "");
+      if (!accessToken) {
+        res.status(403).json({ error: "Access token is required for logout" });
         return;
       }
       res.status(200).json({ message: "Logout successful" });
