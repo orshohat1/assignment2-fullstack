@@ -240,6 +240,69 @@ class UserController {
     }
   }
 
+  static async refresh(req: Request, res: Response): Promise<void> {
+    try {
+      const refreshToken = req.body.refreshToken;
+      if (!refreshToken) {
+        res.status(400).json({ message: "Refresh token not found" });
+        return;
+      }
+      const decoded = jwt.verify(refreshToken, SECRET) as TokenPayload;
+      if (!decoded) {
+        res.status(400).json({ error: "Invalid decoded" });
+        return;
+      }
+
+      const user = await User.findOne({ _id: decoded.userId });
+      if (!user) {
+        res.status(400).json({ message: "Invalid refresh token" });
+        return;
+      }
+
+      if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
+        user.refreshTokens = [];
+        await user.save();
+        res.status(400).json({ message: "Invalid token" });
+        return;
+      }
+
+      const newAccessToken = jwt.sign(
+        { userId: user.id || "user" },
+        SECRET,
+        { expiresIn: "1h" }
+      );
+
+      const newRefreshToken = jwt.sign(
+        { userId: user.id || "user" },
+        SECRET,
+        { expiresIn: "7d" }
+      );
+
+      if (!newAccessToken || !newRefreshToken) {
+        user.refreshTokens = [];
+        await user.save();
+        res.status(400).json({ message: "Missing auth configuration" });
+        return;
+      }
+
+      user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
+      user.refreshTokens.push(newRefreshToken)
+      await user.save();
+
+      res.status(200).send({
+        message: "New tokens generated",
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      });
+
+      return;
+
+    } catch {
+      res.status(500).json({ message: "Server error" });
+      return;
+    }
+  }
+
 }
 
 export default UserController;

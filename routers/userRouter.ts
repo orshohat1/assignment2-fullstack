@@ -51,4 +51,6 @@ router.post(
 // logout
 router.post("/logout", verifyToken, UserController.logout);
 
+router.post("/refresh", verifyToken, UserController.refresh);
+
 export default router;
