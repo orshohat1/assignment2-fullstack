@@ -15,6 +15,8 @@ describe('UserController', () => {
     email: 'testuser@example.com',
     userName: 'testuser',
     password: bcrypt.hashSync('password123', 5),
+    refreshTokens: [],
+    save: jest.fn().mockResolvedValue(true),
   };
 
   beforeAll(() => {
@@ -166,11 +168,33 @@ describe('UserController', () => {
 
   // Test Logout route
   it('should log out a user', async () => {
+
+    const myRefreshToken = jwt.sign(
+      { userId: "123" },
+      "test",
+      { expiresIn: "7d" }
+    );
+
+    const mockUserLogout = {
+      _id: '67530ccde226e97f7d2dc3a5',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'testuser@example.com',
+      userName: 'testuser',
+      password: bcrypt.hashSync('password123', 5),
+      refreshTokens: [myRefreshToken],
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    User.findOne = jest.fn().mockResolvedValue(mockUserLogout);
+
     const response = await request(app)
       .post('/users/logout')
-      .set('Authorization', `Bearer ${accessToken}`);
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ refreshToken: myRefreshToken });
 
     expect(response.status).toBe(200);
+    expect(mockUserLogout.refreshTokens).toHaveLength(0);
     expect(response.body).toHaveProperty('message', 'Logout successful');
   });
 
@@ -180,5 +204,35 @@ describe('UserController', () => {
       .post('/users/logout');
 
     expect(response.status).toBe(403);
+  });
+
+  it('should return 200 with new access and refresh tokens', async () => {
+    const myRefreshToken = jwt.sign(
+      { userId: "123" },
+      "test",
+      { expiresIn: "7d" }
+    );
+
+    const mockUserRefresh = {
+      _id: '67530ccde226e97f7d2dc3a5',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'testuser@example.com',
+      userName: 'testuser',
+      password: bcrypt.hashSync('password123', 5),
+      refreshTokens: [myRefreshToken],
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    User.findOne = jest.fn().mockResolvedValue(mockUserRefresh);
+
+    const response = await request(app)
+      .post('/users/refresh')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ refreshToken: myRefreshToken });
+
+    expect(response.status).toBe(200);
+    expect(response.body.accessToken).toBeDefined();
+    expect(response.body.refreshToken).toBeDefined();
   });
 });

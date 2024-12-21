@@ -7,6 +7,7 @@ interface IUser extends Document {
     email: string;
     userName: string;
     password: string;
+    refreshTokens?: string[];
 }
 
 const UserSchema: Schema<IUser> = new mongoose.Schema({
@@ -15,6 +16,7 @@ const UserSchema: Schema<IUser> = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     userName: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    refreshTokens: { type: [String], required: false, default: [] }
 });
 
 const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);

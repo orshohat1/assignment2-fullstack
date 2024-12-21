@@ -99,7 +99,6 @@ class CommentController {
     };
 
     static async deleteComment(req: Request, res: Response): Promise<void> {
-        console.log(req.body);
         const { id } = req.params;
 
         if (!isValidObjectId(id)) {
