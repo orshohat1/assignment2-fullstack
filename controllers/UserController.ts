@@ -127,11 +127,6 @@ class UserController {
   static async deleteUser(req: Request, res: Response): Promise<void> {
     const userId = req.params.id;
 
-    if (!userId) {
-      res.status(400).json({ error: "must pass userId" });
-      return;
-    }
-
     if (!isValidObjectId(userId)) {
       res.status(400).json({ error: "User not found" });
       return;
@@ -206,10 +201,6 @@ class UserController {
         return;
       }
       const decoded = jwt.verify(refreshToken, SECRET) as TokenPayload;
-      if (!decoded) {
-        res.status(400).json({ error: "Invalid decoded" });
-        return;
-      }
 
       const user = await User.findOne({ _id: decoded.userId });
       if (!user) {
@@ -229,11 +220,7 @@ class UserController {
       user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
       await user.save();
 
-      const accessToken = req.header("Authorization")?.replace("Bearer ", "");
-      if (!accessToken) {
-        res.status(403).json({ error: "Access token is required for logout" });
-        return;
-      }
+      req.header("Authorization")?.replace("Bearer ", "");
       res.status(200).json({ message: "Logout successful" });
     } catch (err) {
       res.status(500).json({ error: "Server error" });
@@ -248,10 +235,6 @@ class UserController {
         return;
       }
       const decoded = jwt.verify(refreshToken, SECRET) as TokenPayload;
-      if (!decoded) {
-        res.status(400).json({ error: "Invalid decoded" });
-        return;
-      }
 
       const user = await User.findOne({ _id: decoded.userId });
       if (!user) {
@@ -302,7 +285,6 @@ class UserController {
       return;
     }
   }
-
 }
 
 export default UserController;

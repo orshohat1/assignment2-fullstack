@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon ./server.ts",
     "start": "tsc && node ./dist/server.js",
-    "test": "tsc && jest --detectOpenHandles --forceExit "
+    "test": "tsc && jest --detectOpenHandles --forceExit"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
