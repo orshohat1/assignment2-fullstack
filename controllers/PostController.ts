@@ -27,7 +27,7 @@ class PostController {
             // Check if the author exists in the database
             const user = await User.findById(authorId);
             if (!user) {
-                res.status(400).json({ error: "Author not found" });
+                res.status(404).json({ error: "Author not found" });
                 return;
             }
 

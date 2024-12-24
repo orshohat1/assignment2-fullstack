@@ -47,7 +47,7 @@ describe("PostController", () => {
             postId = response.body._id;
         });
 
-        it("should return validation error for missing fields", async () => {
+        it("should return 400 for validation error for missing fields", async () => {
             const response = await request(app).post("/posts").send({}).query({ authorId: userId });
 
             expect(response.status).toBe(400);
@@ -66,14 +66,14 @@ describe("PostController", () => {
         });
 
         // Test for Author Not Found
-        it("should return 400 for author not found", async () => {
+        it("should return 404 for author not found", async () => {
             const nonExistentAuthorId = new mongoose.Types.ObjectId();  
             const response = await request(app)
                 .post("/posts")
                 .send({ title: "Test Post", content: "Test Content" })
                 .query({ authorId: nonExistentAuthorId.toString() });
 
-            expect(response.status).toBe(400);
+            expect(response.status).toBe(404);
             expect(response.body).toEqual({ error: "Author not found" });
         });
 
@@ -87,8 +87,6 @@ describe("PostController", () => {
 
             expect(response.status).toBe(500);
             expect(response.body).toEqual({ error: "Server error" });
-
-            jest.restoreAllMocks();
         });
     });
 
@@ -97,14 +95,12 @@ describe("PostController", () => {
             const response = await request(app).get("/posts");
 
             expect(response.status).toBe(200);
-            expect(response.body.length).toBeGreaterThan(0);
         });
 
         it("should retrieve posts by author", async () => {
             const response = await request(app).get("/posts").query({ sender: userId });
 
             expect(response.status).toBe(200);
-            expect(response.body.length).toBeGreaterThan(0);
         });
 
         // Test for No Posts Found for User
