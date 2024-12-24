@@ -322,4 +322,61 @@ describe('UserController', () => {
     expect(response.body.accessToken).toBeDefined();
     expect(response.body.refreshToken).toBeDefined();
   });
+
+  it('should return 400 with new access and refresh tokens', async () => {
+    const myRefreshToken = jwt.sign(
+      { userId: "123" },
+      "test",
+      { expiresIn: "7d" }
+    );
+
+    const mockUserNoRefreshToken = {
+      _id: '67530ccde226e97f7d2dc3a5',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'testuser@example.com',
+      userName: 'testuser',
+      password: bcrypt.hashSync('password123', 5),
+      refreshTokens: [],
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    User.findOne = jest.fn().mockResolvedValue(mockUserNoRefreshToken);
+
+    const response = await request(app)
+      .post('/users/refresh')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ refreshToken: myRefreshToken });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('message', 'Invalid token');
+  });
+
+  it('should return 500 server error', async () => {
+    const notValidToken = "notvalidtoken";
+
+    const mockUserNoRefreshToken = {
+      _id: '67530ccde226e97f7d2dc3a5',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'testuser@example.com',
+      userName: 'testuser',
+      password: bcrypt.hashSync('password123', 5),
+      refreshTokens: [notValidToken],
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    User.findOne = jest.fn().mockResolvedValue(mockUserNoRefreshToken);
+
+    const response = await request(app)
+      .post('/users/refresh')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ refreshToken: notValidToken });
+
+    expect(response.status).toBe(500);
+    expect(response.body).toHaveProperty('message', 'Server error');
+
+
+  });
+
 });
