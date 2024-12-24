@@ -127,11 +127,6 @@ class UserController {
   static async deleteUser(req: Request, res: Response): Promise<void> {
     const userId = req.params.id;
 
-    if (!userId) {
-      res.status(400).json({ error: "must pass userId" });
-      return;
-    }
-
     if (!isValidObjectId(userId)) {
       res.status(400).json({ error: "User not found" });
       return;
@@ -154,6 +149,7 @@ class UserController {
 
     try {
       const user = await User.findOne({ email });
+      console.log("User found:", user);
       if (!user) {
         res.status(404).json({ success: false, message: "User not found" });
         return;
@@ -206,10 +202,6 @@ class UserController {
         return;
       }
       const decoded = jwt.verify(refreshToken, SECRET) as TokenPayload;
-      if (!decoded) {
-        res.status(400).json({ error: "Invalid decoded" });
-        return;
-      }
 
       const user = await User.findOne({ _id: decoded.userId });
       if (!user) {
@@ -230,10 +222,10 @@ class UserController {
       await user.save();
 
       const accessToken = req.header("Authorization")?.replace("Bearer ", "");
-      if (!accessToken) {
-        res.status(403).json({ error: "Access token is required for logout" });
-        return;
-      }
+      // if (!accessToken) {
+      //   res.status(403).json({ error: "Access token is required for logout" });
+      //   return;
+      // }
       res.status(200).json({ message: "Logout successful" });
     } catch (err) {
       res.status(500).json({ error: "Server error" });
@@ -248,10 +240,6 @@ class UserController {
         return;
       }
       const decoded = jwt.verify(refreshToken, SECRET) as TokenPayload;
-      if (!decoded) {
-        res.status(400).json({ error: "Invalid decoded" });
-        return;
-      }
 
       const user = await User.findOne({ _id: decoded.userId });
       if (!user) {
