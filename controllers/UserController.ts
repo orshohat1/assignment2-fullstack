@@ -149,7 +149,6 @@ class UserController {
 
     try {
       const user = await User.findOne({ email });
-      console.log("User found:", user);
       if (!user) {
         res.status(404).json({ success: false, message: "User not found" });
         return;
@@ -221,11 +220,7 @@ class UserController {
       user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken) || [];
       await user.save();
 
-      const accessToken = req.header("Authorization")?.replace("Bearer ", "");
-      // if (!accessToken) {
-      //   res.status(403).json({ error: "Access token is required for logout" });
-      //   return;
-      // }
+      req.header("Authorization")?.replace("Bearer ", "");
       res.status(200).json({ message: "Logout successful" });
     } catch (err) {
       res.status(500).json({ error: "Server error" });
