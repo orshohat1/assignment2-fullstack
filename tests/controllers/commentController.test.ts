@@ -55,7 +55,7 @@ describe("CommentController", () => {
             expect(res.text).toBe("comment is empty");
         });
 
-        it("should return 400 for error during comment creation (Bad request)", async () => {
+        it("should return 500 for error during comment creation (Bad request)", async () => {
             jest.spyOn(Comment.prototype, 'save').mockRejectedValueOnce(new Error('Database error'));
 
             const res = await request(app)
@@ -65,7 +65,7 @@ describe("CommentController", () => {
                     content: "This is a test comment"
                 });
 
-            expect(res.status).toBe(400);
+            expect(res.status).toBe(500);
             expect(res.text).toBe("Database error");
 
             jest.restoreAllMocks();
@@ -110,12 +110,12 @@ describe("CommentController", () => {
             expect(res.text).toBe("Invalid Comment ID");
         });
 
-        it("should return 400 for error during comment retrieval (Bad request)", async () => {
+        it("should return 500 for error during comment retrieval", async () => {
             jest.spyOn(Comment, 'findById').mockRejectedValueOnce(new Error('Database error'));
 
             const res = await request(app).get(`/comments/${mockCommentId}`);
 
-            expect(res.status).toBe(400);
+            expect(res.status).toBe(500);
             expect(res.text).toBe("Database error");
 
             jest.restoreAllMocks();
@@ -160,12 +160,12 @@ describe("CommentController", () => {
             jest.restoreAllMocks();
         });
 
-        it("should return 500 for unknown error during comment retrieval (non-Error object)", async () => {
+        it("should return 400 for unknown error during comment retrieval (non-Error object)", async () => {
             jest.spyOn(Comment, 'find').mockRejectedValueOnce({});
 
             const res = await request(app).get(`/comments/postComments/${mockPostId}`);
 
-            expect(res.status).toBe(500);
+            expect(res.status).toBe(400);
             expect(res.text).toBe("Bad request");
 
             jest.restoreAllMocks();
@@ -254,12 +254,12 @@ describe("CommentController", () => {
                 expect(res.body.error).toBe("Invalid Comment ID");
             });
 
-            it("should return 400 for known errors (instanceof Error)", async () => {
+            it("should return 500 for known errors (instanceof Error)", async () => {
                 jest.spyOn(Comment, "findByIdAndDelete").mockRejectedValueOnce(new Error("Database error"));
         
                 const res = await request(app).delete(`/comments/${mockCommentId}`);
         
-                expect(res.status).toBe(400);
+                expect(res.status).toBe(500);
                 expect(res.text).toBe("Database error");
         
                 jest.restoreAllMocks();

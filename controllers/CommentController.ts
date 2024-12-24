@@ -19,7 +19,7 @@ class CommentController {
             res.status(201).send(comment);
         } catch (err) {
             if (err instanceof Error) {
-                res.status(400).send(err.message);
+                res.status(500).send(err.message);
             } else {
                 res.status(400).send("Bad request");
             }
@@ -39,7 +39,7 @@ class CommentController {
             res.status(200).send({ comment });
         } catch (err) {
             if (err instanceof Error) {
-                res.status(400).send(err.message);
+                res.status(500).send(err.message);
             } else {
                 res.status(400).send("Bad request");
             }
@@ -62,7 +62,7 @@ class CommentController {
             if (err instanceof Error) {
                 res.status(500).send(err.message);
             } else {
-                res.status(500).send("Bad request");
+                res.status(400).send("Bad request");
             }
         }
     };
@@ -91,7 +91,7 @@ class CommentController {
             res.status(200).send({ message: "comment updated!", updatedComment });
         } catch (err) {
             if (err instanceof Error) {
-                res.status(400).send(err.message);
+                res.status(500).send(err.message);
             } else {
                 res.status(400).send("Bad request");
             }
@@ -111,7 +111,7 @@ class CommentController {
             res.status(200).send({ message: "comment deleted successfully", comment });
         } catch (err) {
             if (err instanceof Error) {
-                res.status(400).send(err.message);
+                res.status(500).send(err.message);
             } else {
                 res.status(400).send("Bad request");
             }
