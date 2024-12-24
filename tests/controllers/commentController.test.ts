@@ -68,7 +68,6 @@ describe("CommentController", () => {
             expect(res.status).toBe(500);
             expect(res.text).toBe("Database error");
 
-            jest.restoreAllMocks();
         });
 
         it("should return 400 for unknown error during comment creation", async () => {
@@ -84,7 +83,6 @@ describe("CommentController", () => {
             expect(res.status).toBe(400);
             expect(res.text).toBe("Bad request");
 
-            jest.restoreAllMocks();
         });
     });
 
@@ -117,8 +115,6 @@ describe("CommentController", () => {
 
             expect(res.status).toBe(500);
             expect(res.text).toBe("Database error");
-
-            jest.restoreAllMocks();
         });
 
         it("should return 400 for unknown error during comment retrieval", async () => {
@@ -128,8 +124,6 @@ describe("CommentController", () => {
 
             expect(res.status).toBe(400);
             expect(res.text).toBe("Bad request");
-
-            jest.restoreAllMocks();
         });
     });
 
@@ -156,8 +150,6 @@ describe("CommentController", () => {
 
             expect(res.status).toBe(500);
             expect(res.text).toBe("Database error");
-
-            jest.restoreAllMocks();
         });
 
         it("should return 400 for unknown error during comment retrieval (non-Error object)", async () => {
@@ -167,13 +159,11 @@ describe("CommentController", () => {
 
             expect(res.status).toBe(400);
             expect(res.text).toBe("Bad request");
-
-            jest.restoreAllMocks();
         });
     });
 
     describe("PUT /comments/:id", () => {
-        let mockCommentId: mongoose.Types.ObjectId; 
+        let mockCommentId: mongoose.Types.ObjectId;
 
         beforeEach(() => {
             mockCommentId = new mongoose.Types.ObjectId();
@@ -198,7 +188,7 @@ describe("CommentController", () => {
         });
 
         it("should return 404 for non-existent comment", async () => {
-            const nonExistentCommentId = new mongoose.Types.ObjectId(); 
+            const nonExistentCommentId = new mongoose.Types.ObjectId();
             const res = await request(app)
                 .put(`/comments/${nonExistentCommentId}`)
                 .send({
@@ -210,12 +200,6 @@ describe("CommentController", () => {
         });
 
         it("should return 400 for empty content", async () => {
-            const comment = await Comment.create({
-                _id: mockCommentId,
-                author: mockAuthorId,
-                content: "Original comment content",
-                postId: mockPostId,
-            });
 
             const res = await request(app)
                 .put(`/comments/${mockCommentId}`)
@@ -228,7 +212,7 @@ describe("CommentController", () => {
         });
 
         it("should return 404 for invalid comment id format", async () => {
-            const invalidCommentId = "invalid_id"; 
+            const invalidCommentId = "invalid_id";
             const res = await request(app)
                 .put(`/comments/${invalidCommentId}`)
                 .send({
@@ -236,7 +220,7 @@ describe("CommentController", () => {
                 });
 
             expect(res.status).toBe(404);
-            expect(res.body.error).toBe("Invalid Comment ID"); 
+            expect(res.body.error).toBe("Invalid Comment ID");
         });
 
         describe("DELETE /comments/:id", () => {
@@ -247,33 +231,29 @@ describe("CommentController", () => {
                 expect(res.body.message).toBe("comment deleted successfully");
             });
 
-            it("should return 400 for invalid comment ID", async () => {
+            it("should return 404 for invalid comment ID", async () => {
                 const res = await request(app).delete(`/comments/invalidId`);
 
                 expect(res.status).toBe(404);
                 expect(res.body.error).toBe("Invalid Comment ID");
             });
 
-            it("should return 500 for known errors (instanceof Error)", async () => {
+            it("should return 500 for Database errors)", async () => {
                 jest.spyOn(Comment, "findByIdAndDelete").mockRejectedValueOnce(new Error("Database error"));
-        
+
                 const res = await request(app).delete(`/comments/${mockCommentId}`);
-        
+
                 expect(res.status).toBe(500);
                 expect(res.text).toBe("Database error");
-        
-                jest.restoreAllMocks();
             });
-        
+
             it("should return 400 for non-Error object", async () => {
                 jest.spyOn(Comment, "findByIdAndDelete").mockRejectedValueOnce({});
-        
+
                 const res = await request(app).delete(`/comments/${mockCommentId}`);
-        
+
                 expect(res.status).toBe(400);
                 expect(res.text).toBe("Bad request");
-        
-                jest.restoreAllMocks();
             });
         });
     });
