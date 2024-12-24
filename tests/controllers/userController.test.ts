@@ -91,6 +91,42 @@ describe('UserController', () => {
     expect(response.body.user).toHaveProperty("firstName", "updated newfirstname");
   });
 
+  it("shouldn't update a user because body is empty", async () => {
+    const updatedUser = { ...mockUser, firstName: "updated newfirstname" };
+
+    (User.findByIdAndUpdate as jest.Mock).mockResolvedValueOnce(updatedUser);
+
+    const response = await request(app) // body is empty
+      .put(`/users/${mockUser._id}`)
+      .set("Authorization", `Bearer ${accessToken}`);
+
+
+    expect(response.body).toHaveProperty("error", "must provide a valid user ID and fields to update");
+    expect(response.status).toBe(400);
+  });
+
+
+  it("should hash the password when updating user with a new password", async () => {
+    const newPassword = "password123456";
+    const hashedPassword = "mockedHashedPassword";
+
+    jest.spyOn(bcrypt, "hashSync").mockReturnValue(hashedPassword);
+
+    const updatedUser = { ...mockUser, password: hashedPassword };
+    (User.findByIdAndUpdate as jest.Mock).mockResolvedValueOnce(updatedUser);
+
+    const response = await request(app)
+      .put(`/users/${mockUser._id}`)
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({ password: newPassword });
+
+    expect(bcrypt.hashSync).toHaveBeenCalledWith(newPassword, 5);
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("message", "User updated successfully");
+  });
+
+
+
   it("should get a user by ID", async () => {
     (User.findById as jest.Mock).mockResolvedValue(mockUser);
 
