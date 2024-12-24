@@ -101,8 +101,8 @@ describe('UserController', () => {
       .set("Authorization", `Bearer ${accessToken}`);
 
 
-    expect(response.body).toHaveProperty("error", "must provide a valid user ID and fields to update");
     expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("error", "must provide a valid user ID and fields to update");
   });
 
 
@@ -120,12 +120,10 @@ describe('UserController', () => {
       .set("Authorization", `Bearer ${accessToken}`)
       .send({ password: newPassword });
 
-    expect(bcrypt.hashSync).toHaveBeenCalledWith(newPassword, 5);
     expect(response.status).toBe(200);
+    expect(bcrypt.hashSync).toHaveBeenCalledWith(newPassword, 5);
     expect(response.body).toHaveProperty("message", "User updated successfully");
   });
-
-
 
   it("should get a user by ID", async () => {
     (User.findById as jest.Mock).mockResolvedValue(mockUser);
@@ -323,7 +321,7 @@ describe('UserController', () => {
     expect(response.body.refreshToken).toBeDefined();
   });
 
-  it('should return 400 with new access and refresh tokens', async () => {
+  it('should return 400 if refresh token is not in refreshTokens array in user', async () => {
     const myRefreshToken = jwt.sign(
       { userId: "123" },
       "test",
@@ -375,8 +373,6 @@ describe('UserController', () => {
 
     expect(response.status).toBe(500);
     expect(response.body).toHaveProperty('message', 'Server error');
-
-
   });
 
 });
