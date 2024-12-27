@@ -254,26 +254,10 @@ paths:
       responses:
         "200":
           description: List of posts
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    title:
-                      type: string
-                    content:
-                      type: string
-                    author:
-                      type: string
-                example:
-                  - id: "1"
-                    title: "First Post"
-                    content: "This is the first post"
-                    author: "user1"
+        "404":
+          description: No posts found
+        "500":
+          description: Server Error
     post:
       tags:
         - posts
@@ -322,25 +306,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Post details
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  title:
-                    type: string
-                  content:
-                    type: string
-                  author:
-                    type: string
-              example:
-                id: "1"
-                title: "First Post"
-                content: "This is the first post"
-                author: "user1"
+          description: Got post details
         "500":
           description: Server Error
     put:
@@ -352,6 +318,9 @@ paths:
       parameters:
         - in: path
           name: id
+          required: true
+        - in: query
+          name: authorId
           required: true
           description: ID of the post to update
           schema:
@@ -374,6 +343,8 @@ paths:
       responses:
         "200":
           description: Post updated successfully
+        "400":
+          description: Bad request
         "500":
           description: Server Error
     delete:
