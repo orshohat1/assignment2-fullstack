@@ -35,8 +35,8 @@ components:
           type: string
           description: The user password
       example:
-        email: 'bob@gmail.com'
-        password: '123456'
+        email: 'johndoe@example.com'
+        password: 'Aa123456'
     LogoutRefresh:
       type: object
       required:
@@ -62,15 +62,20 @@ paths:
               properties:
                 firstName:
                   type: string
+                  description: The user's first name
                 lastName:
                   type: string
+                  description: The user's last name
                 email:
                   type: string
+                  description: The user's email
                   format: email
                 userName:
                   type: string
+                  description: The user's username
                 password:
                   type: string
+                  description: The user's password
                   format: password
               required: [firstName, lastName, email, userName, password]
               example:
@@ -96,18 +101,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-                  format: password
-              required: [email, password]
-              example:
-                email: "johndoe@example.com"
-                password: "Aa123456"
+              $ref: '#/components/schemas/User'
       responses:
         "200":
           description: User logged in successfully
@@ -117,50 +111,45 @@ paths:
           description: User not found
         "500":
           description: Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              example:
-                token: "jwt-token"
   /users/logout:
     post:
       tags:
         - users
       summary: Log out a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRefresh'
       description: Logs out the authenticated user by invalidating their session or token.
-      security:
-        - bearerAuth: []
       responses:
         "200":
           description: User logged out successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-              example:
-                message: "User logged out successfully"
         "401":
           description: Unauthorized. The user is not authenticated or token is invalid.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              example:
-                error: "Unauthorized"
         "403":
           description: Token is required for logout
         "500":
           description: Server Error
+  /users/refresh:
+    post:
+      tags:
+        - users
+      summary: Refresh the authentication token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRefresh'
+      responses:
+        "200":
+          description: New tokens generated
+        "400":
+          description: Invalid refresh token
+        "500":
+          description: Internal server error
   /users/{id}:
     get:
       tags:
