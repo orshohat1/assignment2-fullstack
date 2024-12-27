@@ -116,6 +116,8 @@ paths:
       tags:
         - users
       summary: Log out a user
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -137,6 +139,8 @@ paths:
       tags:
         - users
       summary: Refresh the authentication token
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -165,29 +169,8 @@ paths:
       responses:
         "200":
           description: User retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  firstName:
-                    type: string
-                  lastName:
-                    type: string
-                  email:
-                    type: string
-                  userName:
-                    type: string
-              example:
-                id: "1"
-                firstName: "John"
-                lastName: "Doe"
-                email: "johndoe@example.com"
-                userName: "johnD"
         "400":
-          description: Must pass userId
+          description: Bad request
         "404":
           description: User not found
         "500":
@@ -210,26 +193,10 @@ paths:
           description: User deleted successfully.
         "401":
           description: Unauthorized. The user is not authenticated.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              example:
-                error: "Unauthorized"
         "404":
           description: User not found.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              example:
-                error: "User not found"
+        "500":
+          description: Server Error
     put:
       tags:
         - users
@@ -268,37 +235,10 @@ paths:
       responses:
         "200":
           description: User updated successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-              example:
-                message: "User updated successfully"
         "401":
           description: Unauthorized. The user is not authenticated.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              example:
-                error: "Unauthorized"
         "404":
           description: User not found.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              example:
-                error: "User not found"
   /posts:
     get:
       tags:
