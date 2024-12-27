@@ -6,9 +6,52 @@ info:
 servers:
   - url: http://localhost:3000
     description: Local server
+
+tags:
+  - name: "users"
+    description: "Endpoints related to users"
+  - name: "comments"
+    description: "Endpoints related to comments"
+  - name: "posts"
+    description: "Endpoints related to posts"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: The user email
+        password:
+          type: string
+          description: The user password
+      example:
+        email: 'bob@gmail.com'
+        password: '123456'
+    LogoutRefresh:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: The user refresh token
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+
 paths:
   /users/signup:
     post:
+      tags:
+        - users
       summary: Sign up a new user
       requestBody:
         required: true
@@ -45,6 +88,8 @@ paths:
           description: Server Error
   /users/login:
     post:
+      tags:
+        - users
       summary: Log in a user
       requestBody:
         required: true
@@ -83,6 +128,8 @@ paths:
                 token: "jwt-token"
   /users/logout:
     post:
+      tags:
+        - users
       summary: Log out a user
       description: Logs out the authenticated user by invalidating their session or token.
       security:
@@ -116,6 +163,8 @@ paths:
           description: Server Error
   /users/{id}:
     get:
+      tags:
+        - users
       summary: Get user by ID
       parameters:
         - in: path
@@ -155,6 +204,8 @@ paths:
         "500":
           description: Server Error
     delete:
+      tags:
+        - users
       summary: Delete a user by ID
       security:
         - bearerAuth: []
@@ -191,6 +242,8 @@ paths:
               example:
                 error: "User not found"
     put:
+      tags:
+        - users
       summary: Edit a user by ID
       security:
         - bearerAuth: []
@@ -259,6 +312,8 @@ paths:
                 error: "User not found"
   /posts:
     get:
+      tags:
+        - posts
       summary: Get all posts or posts by author
       parameters:
         - in: query
@@ -291,6 +346,8 @@ paths:
                     content: "This is the first post"
                     author: "user1"
     post:
+      tags:
+        - posts
       summary: Add a new post
       security:
         - bearerAuth: []
@@ -324,6 +381,8 @@ paths:
 
   /posts/{id}:
     get:
+      tags:
+        - posts
       summary: Get a post by ID
       parameters:
         - in: path
@@ -356,6 +415,8 @@ paths:
         "500":
           description: Server Error
     put:
+      tags:
+        - posts
       summary: Update a post by ID
       security:
         - bearerAuth: []
@@ -387,6 +448,8 @@ paths:
         "500":
           description: Server Error
     delete:
+      tags:
+        - posts
       summary: Delete a post by ID
       security:
         - bearerAuth: []
@@ -407,6 +470,8 @@ paths:
   
   /comments/post/{postId}:
     post:
+      tags:
+        - comments
       summary: Create a new comment on a post
       description: Creates a new comment on the specified post. Requires authentication.
       security:
@@ -448,6 +513,8 @@ paths:
 
   /comments/{id}:
     get:
+      tags:
+        - comments
       summary: Get a comment by ID
       description: Retrieves a specific comment by its ID.
       parameters:
@@ -481,6 +548,8 @@ paths:
           description: Comment not found
 
     put:
+      tags:
+        - comments
       summary: Edit a comment
       description: Updates an existing comment. Requires authentication.
       security:
@@ -518,6 +587,8 @@ paths:
           description: Comment not found
 
     delete:
+      tags:
+        - comments
       summary: Delete a comment
       description: Deletes a comment by its ID. Requires authentication.
       security:
@@ -539,6 +610,8 @@ paths:
 
   /comments/postComments/{postId}:
     get:
+      tags:
+        - comments
       summary: Get all comments for a specific post
       description: Retrieves all comments associated with a particular post identified by `postId`.
       parameters:
@@ -573,9 +646,3 @@ paths:
                     author: "user2"
         "404":
           description: Post not found, no comments available for this post
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
