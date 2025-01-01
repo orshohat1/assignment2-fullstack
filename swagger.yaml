@@ -6,9 +6,52 @@ info:
 servers:
   - url: http://localhost:3000
     description: Local server
+
+tags:
+  - name: "users"
+    description: "Endpoints related to users"
+  - name: "comments"
+    description: "Endpoints related to comments"
+  - name: "posts"
+    description: "Endpoints related to posts"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: The user email
+        password:
+          type: string
+          description: The user password
+      example:
+        email: 'johndoe@example.com'
+        password: 'Aa123456'
+    LogoutRefresh:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: The user refresh token
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+
 paths:
   /users/signup:
     post:
+      tags:
+        - users
       summary: Sign up a new user
       requestBody:
         required: true
@@ -19,15 +62,20 @@ paths:
               properties:
                 firstName:
                   type: string
+                  description: The user's first name
                 lastName:
                   type: string
+                  description: The user's last name
                 email:
                   type: string
+                  description: The user's email
                   format: email
                 userName:
                   type: string
+                  description: The user's username
                 password:
                   type: string
+                  description: The user's password
                   format: password
               required: [firstName, lastName, email, userName, password]
               example:
@@ -45,24 +93,15 @@ paths:
           description: Server Error
   /users/login:
     post:
+      tags:
+        - users
       summary: Log in a user
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-                  format: password
-              required: [email, password]
-              example:
-                email: "johndoe@example.com"
-                password: "Aa123456"
+              $ref: '#/components/schemas/User'
       responses:
         "200":
           description: User logged in successfully
@@ -72,50 +111,53 @@ paths:
           description: User not found
         "500":
           description: Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              example:
-                token: "jwt-token"
   /users/logout:
     post:
+      tags:
+        - users
       summary: Log out a user
-      description: Logs out the authenticated user by invalidating their session or token.
       security:
         - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRefresh'
+      description: Logs out the authenticated user by invalidating their session or token.
       responses:
         "200":
           description: User logged out successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-              example:
-                message: "User logged out successfully"
         "401":
           description: Unauthorized. The user is not authenticated or token is invalid.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              example:
-                error: "Unauthorized"
         "403":
           description: Token is required for logout
         "500":
           description: Server Error
+  /users/refresh:
+    post:
+      tags:
+        - users
+      summary: Refresh the authentication token
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRefresh'
+      responses:
+        "200":
+          description: New tokens generated
+        "400":
+          description: Invalid refresh token
+        "500":
+          description: Internal server error
   /users/{id}:
     get:
+      tags:
+        - users
       summary: Get user by ID
       parameters:
         - in: path
@@ -127,34 +169,15 @@ paths:
       responses:
         "200":
           description: User retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  firstName:
-                    type: string
-                  lastName:
-                    type: string
-                  email:
-                    type: string
-                  userName:
-                    type: string
-              example:
-                id: "1"
-                firstName: "John"
-                lastName: "Doe"
-                email: "johndoe@example.com"
-                userName: "johnD"
         "400":
-          description: Must pass userId
+          description: Bad request
         "404":
           description: User not found
         "500":
           description: Server Error
     delete:
+      tags:
+        - users
       summary: Delete a user by ID
       security:
         - bearerAuth: []
@@ -170,27 +193,13 @@ paths:
           description: User deleted successfully.
         "401":
           description: Unauthorized. The user is not authenticated.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              example:
-                error: "Unauthorized"
         "404":
           description: User not found.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              example:
-                error: "User not found"
+        "500":
+          description: Server Error
     put:
+      tags:
+        - users
       summary: Edit a user by ID
       security:
         - bearerAuth: []
@@ -226,39 +235,14 @@ paths:
       responses:
         "200":
           description: User updated successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-              example:
-                message: "User updated successfully"
         "401":
           description: Unauthorized. The user is not authenticated.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              example:
-                error: "Unauthorized"
         "404":
           description: User not found.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              example:
-                error: "User not found"
   /posts:
     get:
+      tags:
+        - posts
       summary: Get all posts or posts by author
       parameters:
         - in: query
@@ -270,27 +254,13 @@ paths:
       responses:
         "200":
           description: List of posts
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    title:
-                      type: string
-                    content:
-                      type: string
-                    author:
-                      type: string
-                example:
-                  - id: "1"
-                    title: "First Post"
-                    content: "This is the first post"
-                    author: "user1"
+        "404":
+          description: No posts found
+        "500":
+          description: Server Error
     post:
+      tags:
+        - posts
       summary: Add a new post
       security:
         - bearerAuth: []
@@ -324,6 +294,8 @@ paths:
 
   /posts/{id}:
     get:
+      tags:
+        - posts
       summary: Get a post by ID
       parameters:
         - in: path
@@ -334,34 +306,21 @@ paths:
             type: string
       responses:
         "200":
-          description: Post details
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  title:
-                    type: string
-                  content:
-                    type: string
-                  author:
-                    type: string
-              example:
-                id: "1"
-                title: "First Post"
-                content: "This is the first post"
-                author: "user1"
+          description: Got post details
         "500":
           description: Server Error
     put:
+      tags:
+        - posts
       summary: Update a post by ID
       security:
         - bearerAuth: []
       parameters:
         - in: path
           name: id
+          required: true
+        - in: query
+          name: authorId
           required: true
           description: ID of the post to update
           schema:
@@ -384,9 +343,13 @@ paths:
       responses:
         "200":
           description: Post updated successfully
+        "400":
+          description: Bad request
         "500":
           description: Server Error
     delete:
+      tags:
+        - posts
       summary: Delete a post by ID
       security:
         - bearerAuth: []
@@ -407,6 +370,8 @@ paths:
   
   /comments/post/{postId}:
     post:
+      tags:
+        - comments
       summary: Create a new comment on a post
       description: Creates a new comment on the specified post. Requires authentication.
       security:
@@ -443,11 +408,13 @@ paths:
           description: Comment created successfully
         "400":
           description: Bad request
-        "401":
-          description: Unauthorized, token is required
+        "500":
+          description: Server Error
 
   /comments/{id}:
     get:
+      tags:
+        - comments
       summary: Get a comment by ID
       description: Retrieves a specific comment by its ID.
       parameters:
@@ -460,27 +427,14 @@ paths:
       responses:
         "200":
           description: The comment details
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  content:
-                    type: string
-                  author:
-                    type: string
-                example:
-                  id: "1"
-                  content: "This is a comment"
-                  author: "user1"
         "400":
-          description: Invalid comment ID
-        "404":
-          description: Comment not found
+          description: Bad request
+        "500":
+          description: Server Error
 
     put:
+      tags:
+        - comments
       summary: Edit a comment
       description: Updates an existing comment. Requires authentication.
       security:
@@ -512,12 +466,12 @@ paths:
           description: Comment updated successfully
         "400":
           description: Bad request
-        "401":
-          description: Unauthorized, token is required
         "404":
           description: Comment not found
 
     delete:
+      tags:
+        - comments
       summary: Delete a comment
       description: Deletes a comment by its ID. Requires authentication.
       security:
@@ -532,13 +486,15 @@ paths:
       responses:
         "200":
           description: Comment deleted successfully
-        "401":
-          description: Unauthorized, token is required
         "404":
           description: Comment not found
+        "500":
+          description: Server Error
 
   /comments/postComments/{postId}:
     get:
+      tags:
+        - comments
       summary: Get all comments for a specific post
       description: Retrieves all comments associated with a particular post identified by `postId`.
       parameters:
@@ -551,31 +507,5 @@ paths:
       responses:
         "200":
           description: List of comments for the specified post
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    content:
-                      type: string
-                    author:
-                      type: string
-                example:
-                  - id: "1"
-                    content: "This is the first comment on this post"
-                    author: "user1"
-                  - id: "2"
-                    content: "This is the second comment on this post"
-                    author: "user2"
         "404":
           description: Post not found, no comments available for this post
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
