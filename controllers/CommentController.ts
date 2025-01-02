@@ -62,7 +62,7 @@ class CommentController {
         }
 
         try {
-            
+
             const post = await Post.findById(postId);
             if (!post) {
                 res.status(404).json({ error: "Post not found" });
@@ -120,8 +120,15 @@ class CommentController {
         }
 
         try {
-            const comment = await Comment.findByIdAndDelete(id);
-            res.status(200).send({ message: "comment deleted successfully", comment });
+            const comment = await Comment.findById(id);
+
+            if (!comment) {
+                res.status(404).json({ error: "Comment not found" });
+                return;
+            }
+
+            await Comment.findByIdAndDelete(id);
+            res.status(200).send({ message: "Comment deleted successfully", comment });
         } catch (err) {
             if (err instanceof Error) {
                 res.status(500).send(err.message);
@@ -129,7 +136,8 @@ class CommentController {
                 res.status(400).send("Bad request");
             }
         }
-    };
+    }
+
 
 }
 
