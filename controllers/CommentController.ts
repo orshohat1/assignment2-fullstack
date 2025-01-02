@@ -5,7 +5,7 @@ import Post from "../models/Post";
 
 class CommentController {
     static async createComment(req: Request, res: Response): Promise<void> {
-        const { postId, author} = req.params;
+        const { postId, author } = req.params;
         const { content } = req.body;
 
         if (!content || content.trim() === '') {
@@ -120,15 +120,8 @@ class CommentController {
         }
 
         try {
-            const comment = await Comment.findById(id);
-
-            if (!comment) {
-                res.status(404).json({ error: "Comment not found" });
-                return;
-            }
-
-            await Comment.findByIdAndDelete(id);
-            res.status(200).send({ message: "Comment deleted successfully", comment });
+            const comment = await Comment.findByIdAndDelete(id);
+            res.status(200).send({ message: "comment deleted successfully", comment });
         } catch (err) {
             if (err instanceof Error) {
                 res.status(500).send(err.message);
@@ -136,9 +129,8 @@ class CommentController {
                 res.status(400).send("Bad request");
             }
         }
-    }
-
-
+    };
+    
 }
 
 export default CommentController;
