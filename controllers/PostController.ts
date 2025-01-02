@@ -86,21 +86,11 @@ class PostController {
 
         const { id } = req.params;
         const { title, content } = req.body;
-        const { authorId } = req.query; // Get authorId from query
-
-        // Validate if the author exists in the database
-        if (authorId) {
-            const user = await User.findById(authorId);
-            if (!user) {
-                res.status(400).json({ error: "Invalid author ID" });
-                return;
-            }
-        }
 
         try {
             const post = await Post.findByIdAndUpdate(
                 id,
-                { title, content, author: authorId },
+                { title, content },
                 { new: true, runValidators: true }
             ).populate("author", "firstName lastName email");
 

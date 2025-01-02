@@ -1,12 +1,12 @@
 import Comment from "../models/Comment";
-import mongoose from "mongoose";
 import { isValidObjectId } from "mongoose";
 import { Request, Response } from "express";
+import Post from "../models/Post";
 
 class CommentController {
     static async createComment(req: Request, res: Response): Promise<void> {
-        const { postId } = req.params;
-        const { author, content } = req.body;
+        const { postId, author } = req.params;
+        const { content } = req.body;
 
         if (!content || content.trim() === '') {
             res.status(400).send("comment is empty");
@@ -36,6 +36,12 @@ class CommentController {
 
         try {
             const comment = await Comment.findById(id);
+
+            if (!comment) {
+                res.status(404).send("Comment not found");
+                return;
+            }
+
             res.status(200).send({ comment });
         } catch (err) {
             if (err instanceof Error) {
@@ -44,7 +50,8 @@ class CommentController {
                 res.status(400).send("Bad request");
             }
         }
-    };
+    }
+
 
     static async getAllPostComments(req: Request, res: Response): Promise<void> {
         const { postId } = req.params;
@@ -55,6 +62,12 @@ class CommentController {
         }
 
         try {
+
+            const post = await Post.findById(postId);
+            if (!post) {
+                res.status(404).json({ error: "Post not found" });
+                return;
+            }
             const comments = await Comment.find({ postId: postId });
 
             res.status(200).json({ comments });
@@ -117,7 +130,7 @@ class CommentController {
             }
         }
     };
-
+    
 }
 
 export default CommentController;

@@ -319,12 +319,6 @@ paths:
         - in: path
           name: id
           required: true
-        - in: query
-          name: authorId
-          required: true
-          description: ID of the post to update
-          schema:
-            type: string
       requestBody:
         description: Updated post object
         required: true
@@ -368,7 +362,7 @@ paths:
         "500":
           description: Server Error
   
-  /comments/post/{postId}:
+  /comments/post/{postId}/{author}:
     post:
       tags:
         - comments
@@ -383,6 +377,12 @@ paths:
           schema:
             type: string
           description: The ID of the post to add the comment to
+        - in: path
+          name: author
+          required: true
+          schema:
+            type: string
+          description: The ID of post's author
       requestBody:
         description: The comment data to be created
         required: true
@@ -394,15 +394,10 @@ paths:
                 content:
                   type: string
                   description: The content of the comment
-                author:
-                  type: string
-                  description: The author ID
               required:
                 - content
-                - author
               example:
                 content: "This is a new comment on the post"
-                author: "12345"
       responses:
         "201":
           description: Comment created successfully
@@ -429,6 +424,8 @@ paths:
           description: The comment details
         "400":
           description: Bad request
+        "404":
+          description: Comment not found.
         "500":
           description: Server Error
 
