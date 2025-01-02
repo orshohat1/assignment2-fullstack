@@ -1,7 +1,7 @@
 import Comment from "../models/Comment";
-import mongoose from "mongoose";
 import { isValidObjectId } from "mongoose";
 import { Request, Response } from "express";
+import Post from "../models/Post";
 
 class CommentController {
     static async createComment(req: Request, res: Response): Promise<void> {
@@ -62,6 +62,12 @@ class CommentController {
         }
 
         try {
+            
+            const post = await Post.findById(postId);
+            if (!post) {
+                res.status(404).json({ error: "Post not found" });
+                return;
+            }
             const comments = await Comment.find({ postId: postId });
 
             res.status(200).json({ comments });
