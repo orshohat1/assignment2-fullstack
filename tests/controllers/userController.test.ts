@@ -76,6 +76,21 @@ describe('UserController', () => {
     expect(response.status).toBe(400);
   });
 
+  it('should return 400 if validations error is not empty', async () => {
+    (User.findOne as jest.Mock).mockResolvedValueOnce(mockUser);
+    const response = await request(app)
+      .post('/users/signup')
+      .send({
+        firstName: '', // empty first name
+        lastName: 'Doe',
+        email: 'janedoe@example.com',
+        userName: 'testuser',
+        password: 'password123',
+      });
+
+    expect(response.status).toBe(400);
+  });
+
   it("should update a user by ID", async () => {
     const updatedUser = { ...mockUser, firstName: "updated newfirstname" };
 
@@ -90,6 +105,25 @@ describe('UserController', () => {
     expect(response.body).toHaveProperty("message", "User updated successfully");
     expect(response.body.user).toHaveProperty("firstName", "updated newfirstname");
   });
+
+  it("should return a 500 error if an exception occurs during user update", async () => {
+    const userId = "12345"; // Example userId
+    const updates = { name: "Updated Name" };
+  
+    (User.findByIdAndUpdate as jest.Mock).mockRejectedValue(new Error("Database error"));
+  
+    const response = await request(app)
+      .put(`/users/${userId}`)
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send(updates);
+  
+    expect(response.status).toBe(500);
+    expect(response.body).toHaveProperty(
+      "error",
+      "An error occurred while updating the user"
+    );
+  });
+  
 
   it("shouldn't update a user because body is empty", async () => {
     const updatedUser = { ...mockUser, firstName: "updated newfirstname" };
@@ -146,6 +180,17 @@ describe('UserController', () => {
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("error", "User not found");
   });
+
+  it("should return a 500 error if an exception occurs", async () => {
+    const userId = "12345"; // Example userId
+    (User.findById as jest.Mock).mockRejectedValue(new Error("Database error"));
+  
+    const response = await request(app).get(`/users/${userId}`);
+  
+    expect(response.status).toBe(500);
+    expect(response.body).toHaveProperty("error", "An error occurred");
+  });
+  
 
   it("should delete a user by ID", async () => {
     (User.findByIdAndDelete as jest.Mock).mockResolvedValue(mockUser);
@@ -320,6 +365,16 @@ describe('UserController', () => {
     expect(response.body.accessToken).toBeDefined();
     expect(response.body.refreshToken).toBeDefined();
   });
+
+  it("should return a 400 error if no refresh token is provided", async () => {
+    const response = await request(app).post("/users/refresh")
+    .set('Authorization', `Bearer ${accessToken}`)
+    .send({});
+  
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("message", "Refresh token not found");
+  });
+  
 
   it('should return 400 if refresh token is not in refreshTokens array in user', async () => {
     const myRefreshToken = jwt.sign(

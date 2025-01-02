@@ -87,11 +87,6 @@ class UserController {
         { new: true, runValidators: true }
       );
 
-      if (!updatedUser) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-
       res.status(200).json({ message: "User updated successfully", user: updatedUser });
     } catch (err) {
       res.status(500).json({ error: "An error occurred while updating the user" });
@@ -101,11 +96,6 @@ class UserController {
   // get user by id
   static async getUser(req: Request, res: Response): Promise<void> {
     const userId = req.params.id;
-
-    if (!userId) {
-      res.status(400).json({ error: "must pass userId" });
-      return;
-    }
 
     try {
       const user = await User.findById(
