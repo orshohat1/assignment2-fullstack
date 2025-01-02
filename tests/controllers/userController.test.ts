@@ -107,7 +107,7 @@ describe('UserController', () => {
   });
 
   it("should return a 500 error if an exception occurs during user update", async () => {
-    const userId = "12345"; // Example userId
+    const userId = "12345";
     const updates = { name: "Updated Name" };
   
     (User.findByIdAndUpdate as jest.Mock).mockRejectedValue(new Error("Database error"));
@@ -182,7 +182,7 @@ describe('UserController', () => {
   });
 
   it("should return a 500 error if an exception occurs", async () => {
-    const userId = "12345"; // Example userId
+    const userId = "12345";
     (User.findById as jest.Mock).mockRejectedValue(new Error("Database error"));
   
     const response = await request(app).get(`/users/${userId}`);
