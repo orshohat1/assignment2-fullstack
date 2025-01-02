@@ -429,6 +429,8 @@ paths:
           description: The comment details
         "400":
           description: Bad request
+        "404":
+          description: Comment not found.
         "500":
           description: Server Error
 

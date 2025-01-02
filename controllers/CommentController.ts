@@ -36,6 +36,12 @@ class CommentController {
 
         try {
             const comment = await Comment.findById(id);
+
+            if (!comment) {
+                res.status(404).send("Comment not found");
+                return;
+            }
+
             res.status(200).send({ comment });
         } catch (err) {
             if (err instanceof Error) {
@@ -44,7 +50,8 @@ class CommentController {
                 res.status(400).send("Bad request");
             }
         }
-    };
+    }
+
 
     static async getAllPostComments(req: Request, res: Response): Promise<void> {
         const { postId } = req.params;
