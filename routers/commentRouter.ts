@@ -7,7 +7,7 @@ router.get("/postComments/:postId", CommentController.getAllPostComments);
 
 router.get("/:id", CommentController.getCommentById);
 
-router.post("/post/:postId", verifyToken, CommentController.createComment);
+router.post("/post/:postId/:author", verifyToken, CommentController.createComment);
 
 router.put("/:id", verifyToken, CommentController.editComment);
 

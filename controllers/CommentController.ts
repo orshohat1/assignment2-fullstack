@@ -5,8 +5,8 @@ import Post from "../models/Post";
 
 class CommentController {
     static async createComment(req: Request, res: Response): Promise<void> {
-        const { postId } = req.params;
-        const { author, content } = req.body;
+        const { postId, author} = req.params;
+        const { content } = req.body;
 
         if (!content || content.trim() === '') {
             res.status(400).send("comment is empty");

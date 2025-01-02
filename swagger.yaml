@@ -368,7 +368,7 @@ paths:
         "500":
           description: Server Error
   
-  /comments/post/{postId}:
+  /comments/post/{postId}/{author}:
     post:
       tags:
         - comments
@@ -383,6 +383,12 @@ paths:
           schema:
             type: string
           description: The ID of the post to add the comment to
+        - in: path
+          name: author
+          required: true
+          schema:
+            type: string
+          description: The ID of post's author
       requestBody:
         description: The comment data to be created
         required: true
@@ -394,15 +400,10 @@ paths:
                 content:
                   type: string
                   description: The content of the comment
-                author:
-                  type: string
-                  description: The author ID
               required:
                 - content
-                - author
               example:
                 content: "This is a new comment on the post"
-                author: "12345"
       responses:
         "201":
           description: Comment created successfully
